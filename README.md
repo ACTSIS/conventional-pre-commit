@@ -1,21 +1,21 @@
 # conventional-pre-commit
 
-A [`pre-commit`](https://pre-commit.com) hook to check commit messages for
-[Conventional Commits](https://conventionalcommits.org) formatting.
+Un hook de [`pre-commit`](https://pre-commit.com) para verificar que los mensajes de commit sigan el formato de
+[Conventional Commits](https://conventionalcommits.org).
 
-Works with Python >= 3.8.
+Funciona con Python >= 3.8.
 
-## Usage
+## Uso
 
-Make sure `pre-commit` is [installed](https://pre-commit.com#install).
+Asegúrate de que `pre-commit` esté [instalado](https://pre-commit.com#install).
 
-Create a blank configuration file at the root of your repo, if needed:
+Crea un archivo de configuración en blanco en la raíz de tu repositorio, si es necesario:
 
 ```console
 touch .pre-commit-config.yaml
 ```
 
-Add/update `default_install_hook_types` and add a new repo entry in your configuration file:
+Agrega/actualiza `default_install_hook_types` y agrega una nueva entrada de repositorio en tu archivo de configuración:
 
 ```yaml
 default_install_hook_types:
@@ -26,20 +26,20 @@ repos:
   # - repo: ...
 
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: <git sha or tag>
+    rev: <git sha o tag>
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
         args: []
 ```
 
-Install the `pre-commit` script:
+Instala el script de `pre-commit`:
 
 ```console
 pre-commit install --install-hooks
 ```
 
-Make a (normal) commit :x::
+Haz un commit (normal) :x::
 
 ```console
 $ git commit -m "add a new feature"
@@ -51,11 +51,11 @@ Conventional Commit......................................................Failed
 - exit code: 1
 
 [Mensaje de commit incorrecto] >> add a new feature
-Your commit message does not follow Conventional Commits formatting
+Tu mensaje de commit no sigue el formato de Conventional Commits
 https://dev.azure.com/ACTSIS/DEVOPS/_wiki/wikis/DEVOPS.wiki/106/Buenas-pr%C3%A1cticas-Git/
 ```
 
-And with the `--verbose` arg:
+Y con el argumento `--verbose`:
 
 ```console
 $ git commit -m "add a new feature"
@@ -67,7 +67,7 @@ Conventional Commit......................................................Failed
 - exit code: 1
 
 [Mensaje de commit incorrecto] >> add a new feature
-Your commit message does not follow Conventional Commits formatting
+Tu mensaje de commit no sigue el formato de Conventional Commits
 https://dev.azure.com/ACTSIS/DEVOPS/_wiki/wikis/DEVOPS.wiki/106/Buenas-pr%C3%A1cticas-Git/
 
 Los mensajes de commit convencionales siguen un patrón como:
@@ -80,14 +80,14 @@ Por favor corrige los siguientes errores:
 
   - Valor esperado para type de: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test
 
-Run:
+Ejecuta:
 
     git commit --edit --file=.git/COMMIT_EDITMSG
 
 para editar el mensaje de commit y reintentar el commit.
 ```
 
-Make a (conventional) commit :heavy_check_mark::
+Haz un commit (convencional) :heavy_check_mark::
 
 ```console
 $ git commit -m "feat:92564 add a new feature"
@@ -98,46 +98,46 @@ Conventional Commit......................................................Passed
 - duration: 0.05s
 ```
 
-## Install with pip
+## Instalar con pip
 
-`conventional-pre-commit` can also be installed and used from the command line:
+`conventional-pre-commit` también se puede instalar y usar desde la línea de comandos:
 
 ```shell
 pip install conventional-pre-commit
 ```
 
-Then run the command line script:
+Luego ejecuta el script de línea de comandos:
 
 ```shell
 conventional-pre-commit [types] input
 ```
 
-- `[types]` is an optional list of Conventional Commit types to allow (e.g. `feat fix chore`)
+- `[types]` es una lista opcional de tipos de Conventional Commit permitidos (por ejemplo, `feat fix chore`)
 
-- `input` is a file containing the commit message to check:
+- `input` es un archivo que contiene el mensaje de commit a verificar:
 
 ```shell
 conventional-pre-commit feat fix chore ci test .git/COMMIT_MSG
 ```
 
-Or from a Python program:
+O desde un programa en Python:
 
 ```python
 from conventional_pre_commit.format import is_conventional
 
-# prints True
+# imprime True
 print(is_conventional("feat:92564 this is a conventional commit"))
 
-# prints False
+# imprime False
 print(is_conventional("nope: this is not a conventional commit"))
 
-# prints True
+# imprime True
 print(is_conventional("custom: this is a conventional commit", types=["custom"]))
 ```
 
-## Passing `args`
+## Pasando `args`
 
-`conventional-pre-commit` supports a number of arguments to configure behavior:
+`conventional-pre-commit` soporta varios argumentos para configurar su comportamiento:
 
 ```shell
 $ conventional-pre-commit -h
@@ -145,61 +145,60 @@ usage: conventional-pre-commit [-h] [--no-color] [--force-scope] [--scopes SCOPE
 
 Verifica si un mensaje de commit de git sigue el formato de Conventional Commits.
 
-positional arguments:
+argumentos posicionales:
   types            Lista opcional de tipos a soportar.
   input            Un archivo que contiene un mensaje de commit de git.
 
-options:
-  -h, --help       show this help message and exit
+opciones:
+  -h, --help       muestra este mensaje de ayuda y sale
   --no-color       Desactiva los colores en la salida.
-  --force-scope    Fuerza a que el commit tenga un scope definido.
+  --force-scope    Obliga a que el commit tenga un scope definido.
   --scopes SCOPES  Lista de scopes soportados. Los scopes deben estar separados por comas sin espacios (por ejemplo: api,cliente).
-  --strict         Fuerza a que el commit siga estrictamente el formato de Conventional Commits. No permite commits con fixup! ni merge.
+  --strict         Obliga a que el commit siga estrictamente el formato de Conventional Commits. No permite commits con fixup! ni merge.
   --verbose        Imprime mensajes de error más detallados.
 ```
 
-Supply arguments on the command-line, or via the pre-commit `hooks.args` property:
+Proporciona argumentos en la línea de comandos, o a través de la propiedad `hooks.args` de pre-commit:
 
 ```yaml
 repos:
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: <git sha or tag>
+    rev: <git sha o tag>
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
         args: [--strict, --force-scope, feat, fix, chore, test, custom]
 ```
 
-**NOTE:** when using as a pre-commit hook, `input` is supplied automatically (with the current commit's message).
+**NOTE:** cuando se usa como un hook de pre-commit, `input` se proporciona automáticamente (con el mensaje del commit actual).
 
-## Development
+## Desarrollo
 
-`conventional-pre-commit` comes with a [VS Code devcontainer](https://code.visualstudio.com/learn/develop-cloud/containers)
-configuration to provide a consistent development environment.
+`conventional-pre-commit` viene con una configuración de [VS Code devcontainer](https://code.visualstudio.com/learn/develop-cloud/containers)
+para proporcionar un entorno de desarrollo consistente.
 
-With the `Remote - Containers` extension enabled, open the folder containing this repository inside Visual Studio Code.
+Con la extensión `Remote - Containers` habilitada, abre la carpeta que contiene este repositorio dentro de Visual Studio Code.Code.
 
-You should receive a prompt in the Visual Studio Code window; click `Reopen in Container` to run the development environment
-inside the devcontainer.
+Deberías recibir un aviso en la ventana de Visual Studio Code; haz clic en  `Reopen in Container` para ejecutar el entorno de desarrollo dentro del devcontainer.
 
-If you do not receive a prompt, or when you feel like starting from a fresh environment:
+Si no recibes un aviso, o cuando sientas que necesitas comenzar desde un entorno nuevo:
 
-1. `Ctrl/Cmd+Shift+P` to bring up the command palette in Visual Studio Code
-1. Type `Remote-Containers` to filter the commands
-1. Select `Rebuild and Reopen in Container` to completely rebuild the devcontainer
-1. Select `Reopen in Container` to reopen the most recent devcontainer build
+1. `Ctrl/Cmd+Shift+P` para abrir el paleta de comandos en Visual Studio Code
+1. Escribe `Remote-Containers` para filtrar los comandos
+1. Selecciona `Rebuild and Reopen in Container` para reconstruir completamente el devcontainer
+1. Selecciona `Reopen in Container` para reabrir la última construcción del devcontainer
 
-## Versioning
+## Versionado
 
-Versioning generally follows [Semantic Versioning](https://semver.org/).
+El versionado generalmente sigue [Semantic Versioning](https://semver.org/).
 
-## Making a release
+## Haciendo un release
 
-Releases to PyPI and GitHub are triggered by pushing a tag.
+Los releases a PyPI y GitHub se activan al empujar una etiqueta.
 
-1. Ensure all changes for the release are present in the `main` branch
-1. Tag with the new version: `git tag vX.Y.Z` for regular release, `git tag vX.Y.Z-preN` for pre-release
-1. Push the new version tag: `git push origin vX.Y.Z`
+1. Asegúrate de que todos los cambios para el release estén presentes en la rama `main`
+1. Etiqueta con la nueva versión: `git tag vX.Y.Z` para un release, `git tag vX.Y.Z-preN` para un pre-release
+1. Empuja la nueva etiqueta de versión: `git push origin vX.Y.Z`
 
 ## License
 
