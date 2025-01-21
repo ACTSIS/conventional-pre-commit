@@ -120,10 +120,10 @@ def test_main_fail__verbose(bad_commit_path, capsys):
     assert Colors.LRED in output
     assert Colors.RESTORE in output
     assert Colors.YELLOW in output
-    assert "Conventional Commit messages follow a pattern like" in output
-    assert f"type(scope): subject{os.linesep}{os.linesep}    extended body" in output
+    assert "Los mensajes de commit convencionales siguen un patrón como:" in output
+    assert f"type(scope): asunto{os.linesep}{os.linesep}    cuerpo extendido" in output
     assert "git commit --edit --file=.git/COMMIT_EDITMSG" in output
-    assert "edit the commit message and retry the commit" in output
+    assert "para editar el mensaje de commit y reintentar el commit." in output
 
 
 def test_main_fail__no_color(bad_commit_path, capsys):
