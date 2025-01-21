@@ -86,7 +86,7 @@ def test_fail_verbose__optional_scope(commit):
 
 
 def test_fail_verbose__missing_subject():
-    commit = ConventionalCommit("feat(scope):", scope_optional=False)
+    commit = ConventionalCommit("feat(scope):92564", scope_optional=False)
     output = fail_verbose(commit, use_color=False)
 
     assert "Valor esperado para subject pero no se encontró ninguno." in output
@@ -97,7 +97,7 @@ def test_fail_verbose__missing_subject():
 def test_fail_verbose__no_body_sep():
     commit = ConventionalCommit(
         scope_optional=False,
-        commit_msg="""feat(scope): subject
+        commit_msg="""feat(scope):92564 subject
 body without blank line
 """,
     )
@@ -110,6 +110,38 @@ body without blank line
     assert "Valor esperado para subject pero no se encontró ninguno." not in output
     assert "Valor esperado para type pero no se encontró ninguno." not in output
     assert "Valor esperado para scope pero no se encontró ninguno." not in output
+
+
+def test_fail_no_id():
+    """
+    Prueba que verifica que falta el 'id' en el mensaje de commit.
+    """
+    # Mensaje de commit con type y scope válidos, y subject, pero sin id
+    commit_message = "feat(scope): subject"
+    commit = ConventionalCommit(commit_msg=commit_message, scope_optional=False)
+    output = fail_verbose(commit, use_color=False)
+
+    # Verificar que el error de 'id' está presente en la salida
+    expected_error = "  - Valor esperado para id (Número del requerimiento) pero no se encontró ninguno."
+    assert expected_error in output, f"Se esperaba el error de 'id' en la salida, pero no se encontró. Salida: {output}"
+
+    # Asegurarse de que no haya otros errores inesperados
+    assert "Valor esperado para tipo pero no se encontró ninguno." not in output, "No se esperaba un error de 'type'."
+    assert "Valor esperado para scope pero no se encontró ninguno." not in output, "No se esperaba un error de 'scope'."
+    assert "Valor esperado para subject pero no se encontró ninguno." not in output, "No se esperaba un error de 'subject'."
+
+
+def test_valid_commit():
+    """
+    Prueba que verifica que un mensaje de commit válido no reporte errores.
+    """
+    # Mensaje de commit válido con type, scope, id y subject
+    commit_message = "feat(scope):123 Implementar nueva funcionalidad"
+    commit = ConventionalCommit(commit_msg=commit_message, scope_optional=False)
+    output = fail_verbose(commit, use_color=False)
+
+    # No debería haber mensajes de error
+    assert "Por favor corrige los siguientes errores:" not in output, "No se esperaban errores para un commit válido."
 
 
 def test_unicode_decode_error():

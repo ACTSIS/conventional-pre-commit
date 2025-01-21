@@ -120,11 +120,22 @@ class ConventionalCommit(Commit):
         return self._r_or(self.types)
 
     @property
+    def r_id(self):
+        """Expresión regular para el identificador numérico requerido después del delimitador."""
+        return r"\d{1,9}"
+
+    @property
+    def r_subject(self):
+        """Cadena regex para la línea de asunto, asumiendo que tras el ID habrá un espacio y luego el mensaje."""
+        # Aseguramos que haya un espacio luego del número y el resto del mensaje
+        return r" .+$"
+
+    @property
     def r_scope(self):
-        """Cadena regex para un scope opcional."""
+        """Cadena regex para un scope opcional o requerido con formato específico."""
         if self.scopes:
             scopes = self._r_or(self.scopes)
-            escaped_delimiters = list(map(re.escape, [":", ",", "-", "/"]))  # type: ignore
+            escaped_delimiters = list(map(re.escape, [":", ",", "-", "/"]))
             delimiters_pattern = self._r_or(escaped_delimiters)
             scope_pattern = rf"\(\s*(?:{scopes})(?:\s*(?:{delimiters_pattern})\s*(?:{scopes}))*\s*\)"
 
@@ -144,11 +155,6 @@ class ConventionalCommit(Commit):
         return r"!?:"
 
     @property
-    def r_subject(self):
-        """Cadena regex para la línea de asunto."""
-        return r" .+$"
-
-    @property
     def r_body(self):
         """Cadena regex para el cuerpo, con soporte multilinea."""
         return r"(?P<multi>\r?\n(?P<sep>^$\r?\n)?.+)?"
@@ -158,10 +164,13 @@ class ConventionalCommit(Commit):
         """`re.Pattern` para el formato de Conventional Commits."""
         types_pattern = f"^(?P<type>{self.r_types})?"
         scope_pattern = f"(?P<scope>{self.r_scope})?"
-        delim_pattern = f"(?P<delim>{self.r_delim})?"
+        # Combina el delimitador, el ID numérico y el asunto
+        delim_pattern = f"(?P<delim>{self.r_delim})"
+        id_pattern = f"(?P<id>{self.r_id})"
         subject_pattern = f"(?P<subject>{self.r_subject})?"
         body_pattern = f"(?P<body>{self.r_body})?"
-        pattern = types_pattern + scope_pattern + delim_pattern + subject_pattern + body_pattern
+
+        pattern = types_pattern + scope_pattern + delim_pattern + id_pattern + subject_pattern + body_pattern
 
         return re.compile(pattern, re.MULTILINE)
 
@@ -169,38 +178,54 @@ class ConventionalCommit(Commit):
         """
         Devuelve una lista de componentes faltantes de Conventional Commits en un mensaje de commit.
         """
-        match = self.match(commit_msg)
-        groups = match.groupdict() if match else {}
+        commit_msg = self.clean(commit_msg)
 
-        # With a type error, the rest of the components will be unmatched
-        # even if the overall structure of the commit is correct,
-        # since a correct type must come first.
-        #
-        # E.g. with an invalid type:
-        #
-        #    invalid: this is a commit
-        #
-        # The delim, subject, and body components would all be missing from the match
-        # there's no need to notify on the other components when the type is invalid
-        if not groups.get("type"):
-            groups.pop("delim", None)
-            groups.pop("subject", None)
-            groups.pop("body", None)
+        missing = []
 
-        if self.scope_optional:
-            groups.pop("scope", None)
+        # Verificar el 'type'
+        if not re.match(rf"^{self.r_types}", commit_msg):
+            missing.append("type")
 
-        if not groups.get("body"):
-            groups.pop("multi", None)
-            groups.pop("sep", None)
+        # Verificar el 'scope' si no es opcional
+        if not self.scope_optional:
+            if not re.match(rf"^{self.r_types}\({self.r_scope}\)", commit_msg):
+                missing.append("scope")
+        else:
+            # Si el scope es opcional pero presente, verificar su validez
+            scope_match = re.match(rf"^{self.r_types}\({self.r_scope}\)", commit_msg)
+            if scope_match and not scope_match.group("scope"):
+                missing.append("scope")
 
-        return [g for g, v in groups.items() if not v]
+        # Verificar el 'delim'
+        if not re.search(rf"{self.r_delim}", commit_msg):
+            missing.append("delim")
+
+        # Verificar el 'id'
+        if not re.search(rf"{self.r_delim}\s*\d{{1,9}}", commit_msg):
+            missing.append("id")
+
+        # Verificar el 'subject'
+        subject_match = re.search(rf"{self.r_subject}", commit_msg)
+        if not subject_match:
+            missing.append("subject")
+
+        # Verificar 'body' y 'sep'
+        # Determinar si hay un cuerpo presente (un salto de línea seguido de texto)
+        body_present = bool(re.search(r"\r?\n.+", commit_msg))
+        if body_present:
+            # Verificar si hay una línea en blanco (sep) antes del cuerpo
+            # Esto significa que hay dos saltos de línea consecutivos
+            if not re.search(r"\r?\n\r?\n.+", commit_msg):
+                missing.append("sep")
+
+        return missing
 
     def is_valid(self, commit_msg: str = "") -> bool:
         """
         Devuelve True si el mensaje de commit cumple con el formato de Conventional Commits.
         https://www.conventionalcommits.org
         """
+
         match = self.match(commit_msg)
 
         # match all the required components

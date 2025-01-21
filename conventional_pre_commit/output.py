@@ -74,12 +74,17 @@ def fail_verbose(commit: ConventionalCommit, use_color=True):
                 lines.append(f"{c.yellow}  - Valor esperado para {c.restore}tipo{c.yellow} de: {type_opts}")
             elif group == "scope":
                 if commit.scopes:
-                    scopt_opts = _options(commit.scopes)
-                    lines.append(f"{c.yellow}  - Valor esperado para {c.restore}scope{c.yellow} de: {scopt_opts}")
+                    scope_opts = _options(commit.scopes)
+                    lines.append(f"{c.yellow}  - Valor esperado para {c.restore}scope{c.yellow} de: {scope_opts}")
                 else:
                     lines.append(
                         f"{c.yellow}  - Valor esperado para {c.restore}scope{c.yellow} pero no se encontró ninguno.{c.restore}"
                     )
+            elif group == "id":
+                # Nuevo manejo para el identificador numérico
+                lines.append(
+                    f"{c.yellow}  - Valor esperado para {c.restore}id (Número del requerimiento){c.yellow} pero no se encontró ninguno.{c.restore}"
+                )
             else:
                 lines.append(
                     f"{c.yellow}  - Valor esperado para {c.restore}{group}{c.yellow} pero no se encontró ninguno.{c.restore}"

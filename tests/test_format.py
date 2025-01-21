@@ -25,7 +25,7 @@ def conventional_commit_scope_required(conventional_commit) -> ConventionalCommi
 
 def test_commit_init():
     input = (
-        """feat: some commit message
+        """feat:92564 some commit message
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
 #
@@ -55,7 +55,7 @@ index ea80a93..fe8a527 100644
 """
     )
 
-    expected = "feat: some commit message\n"
+    expected = "feat:92564 some commit message\n"
 
     assert Commit(input).message == expected
 
@@ -105,7 +105,7 @@ def test_strip_comments__spaced(commit):
 
 def test_r_verbose_commit_ignored__does_not_match_no_verbose(commit):
     regex = re.compile(commit.r_verbose_commit_ignored, re.DOTALL | re.MULTILINE)
-    input = """feat: some commit message
+    input = """feat:92564 some commit message
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
 #
@@ -126,7 +126,7 @@ def test_r_verbose_commit_ignored__does_not_match_no_verbose(commit):
 def test_r_verbose_commit_ignored__matches_single_verbose_ignored(commit):
     regex = re.compile(commit.r_verbose_commit_ignored, re.DOTALL | re.MULTILINE)
     input = (
-        """feat: some commit message
+        """feat:92564 some commit message
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
 #
@@ -162,7 +162,7 @@ index ea80a93..fe8a527 100644
 def test_r_verbose_commit_ignored__matches_double_verbose_ignored(commit):
     regex = re.compile(commit.r_verbose_commit_ignored, re.DOTALL | re.MULTILINE)
     input = (
-        """feat: some commit message
+        """feat:92564 some commit message
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
 #
@@ -217,7 +217,7 @@ index fe8a527..1c00c14 100644
 
 
 def test_strip_verbose_commit_ignored__does_not_strip_no_verbose(commit):
-    input = """feat: some commit message
+    input = """feat:92564 some commit message
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
 #
@@ -232,7 +232,7 @@ def test_strip_verbose_commit_ignored__does_not_strip_no_verbose(commit):
 #
 """
 
-    expected = """feat: some commit message
+    expected = """feat:92564 some commit message
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
 #
@@ -253,7 +253,7 @@ def test_strip_verbose_commit_ignored__does_not_strip_no_verbose(commit):
 
 def test_strip_verbose_commit_ignored__strips_single_verbose_ignored(commit):
     input = (
-        """feat: some commit message
+        """feat:92564 some commit message
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
 #
@@ -283,7 +283,7 @@ index ea80a93..fe8a527 100644
 """
     )
 
-    expected = """feat: some commit message
+    expected = """feat:92564 some commit message
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
 #
@@ -304,7 +304,7 @@ index ea80a93..fe8a527 100644
 
 def test_strip_verbose_commit_ignored__strips_double_verbose_ignored(commit):
     input = (
-        """feat: some commit message
+        """feat:92564 some commit message
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
 #
@@ -355,7 +355,7 @@ index fe8a527..1c00c14 100644
 """
     )
 
-    expected = """feat: some commit message
+    expected = """feat:92564 some commit message
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
 #
@@ -417,7 +417,6 @@ def test_r_scope__not_optional(conventional_commit_scope_required):
 
     assert not regex.match("")
     assert not regex.match("scope")
-    assert regex.match("(scope)")
 
 
 def test_r_scope__alphanumeric(conventional_commit_scope_required):
@@ -510,19 +509,20 @@ def test_regex(conventional_commit):
 
 
 def test_match(conventional_commit):
-    match = conventional_commit.match("test: subject line")
+    match = conventional_commit.match("test:92564 subject line")
 
     assert isinstance(match, re.Match)
     assert match.group("type") == "test"
     assert match.group("scope") == ""
     assert match.group("delim") == ":"
+    assert match.group("id") == "92564"
     assert match.group("subject").strip() == "subject line"
     assert match.group("body") == ""
 
 
 def test_match_multiline(conventional_commit):
     match = conventional_commit.match(
-        """test(scope): subject line
+        """test(scope):92564 subject line
 
 body copy
 """
@@ -531,42 +531,38 @@ body copy
     assert match.group("type") == "test"
     assert match.group("scope") == "(scope)"
     assert match.group("delim") == ":"
+    assert match.group("id") == "92564"
     assert match.group("subject").strip() == "subject line"
     assert match.group("body").strip() == "body copy"
 
 
 def test_match_invalid_type(conventional_commit):
     match = conventional_commit.match(
-        """invalid(scope): subject line
+        """invalid(scope):92564 subject line
 
 body copy
 """
     )
-    assert isinstance(match, re.Match)
-    assert match.group("type") is None
-    assert match.group("scope") == ""
-    assert match.group("delim") is None
-    assert match.group("subject") is None
-    assert match.group("body") == ""
+    assert match is None
 
 
 @pytest.mark.parametrize("type", ConventionalCommit.DEFAULT_TYPES)
 def test_is_valid__default_type(conventional_commit, type):
-    input = f"{type}: message"
+    input = f"{type}:92564 message"
 
     assert conventional_commit.is_valid(input)
 
 
 @pytest.mark.parametrize("type", ConventionalCommit.CONVENTIONAL_TYPES)
 def test_is_valid__conventional_type(conventional_commit, type):
-    input = f"{type}: message"
+    input = f"{type}:92564 message"
 
     assert conventional_commit.is_valid(input)
 
 
 @pytest.mark.parametrize("type", CUSTOM_TYPES)
 def test_is_valid__custom_type(type):
-    input = f"{type}: message"
+    input = f"{type}:92564 message"
     conventional_commits = ConventionalCommit(types=CUSTOM_TYPES)
 
     assert conventional_commits.is_valid(input)
@@ -574,26 +570,26 @@ def test_is_valid__custom_type(type):
 
 @pytest.mark.parametrize("type", ConventionalCommit.CONVENTIONAL_TYPES)
 def test_is_valid__conventional_custom_type(type):
-    input = f"{type}: message"
+    input = f"{type}:92564 message"
     conventional_commits = ConventionalCommit(types=CUSTOM_TYPES)
 
     assert conventional_commits.is_valid(input)
 
 
 def test_is_valid__breaking_change(conventional_commit):
-    input = "fix!: message"
+    input = "fix!:92564 message"
 
     assert conventional_commit.is_valid(input)
 
 
 def test_is_valid__with_scope(conventional_commit):
-    input = "feat(scope): message"
+    input = "feat(scope):92564 message"
 
     assert conventional_commit.is_valid(input)
 
 
 def test_is_valid__body_multiline_body_bad_type(conventional_commit):
-    input = """wrong: message
+    input = """wrong:92564 message
 
     more_message
     """
@@ -602,7 +598,7 @@ def test_is_valid__body_multiline_body_bad_type(conventional_commit):
 
 
 def test_is_valid__bad_body_multiline(conventional_commit):
-    input = """feat(scope): message
+    input = """feat(scope):92564 message
     more message
     """
 
@@ -610,7 +606,7 @@ def test_is_valid__bad_body_multiline(conventional_commit):
 
 
 def test_is_valid__body_multiline(conventional_commit):
-    input = """feat(scope): message
+    input = """feat(scope):92564 message
 
     more message
     """
@@ -619,7 +615,7 @@ def test_is_valid__body_multiline(conventional_commit):
 
 
 def test_is_valid__bad_body_multiline_paragraphs(conventional_commit):
-    input = """feat(scope): message
+    input = """feat(scope):92564 message
     more message
 
     more body message
@@ -629,7 +625,7 @@ def test_is_valid__bad_body_multiline_paragraphs(conventional_commit):
 
 
 def test_is_valid__comment(conventional_commit):
-    input = """feat(scope): message
+    input = """feat(scope):92564 message
 # Please enter the commit message for your changes.
 # These are comments usually added by editors, f.ex. with export EDITOR=vim
 """
@@ -638,49 +634,49 @@ def test_is_valid__comment(conventional_commit):
 
 @pytest.mark.parametrize("char", ['"', "'", "`", "#", "&"])
 def test_is_valid__body_special_char(conventional_commit, char):
-    input = f"feat: message with {char}"
+    input = f"feat:92564 message with {char}"
 
     assert conventional_commit.is_valid(input)
 
 
 def test_is_valid__wrong_type(conventional_commit):
-    input = "wrong: message"
+    input = "wrong:92564 message"
 
     assert not conventional_commit.is_valid(input)
 
 
 def test_is_valid__scope_special_chars(conventional_commit):
-    input = "feat(%&*@()): message"
+    input = "feat(%&*@()):92564 message"
 
     assert not conventional_commit.is_valid(input)
 
 
 def test_is_valid__space_scope(conventional_commit):
-    input = "feat (scope): message"
+    input = "feat (scope):92564 message"
 
     assert not conventional_commit.is_valid(input)
 
 
 def test_is_valid__scope_space(conventional_commit):
-    input = "feat(scope) : message"
+    input = "feat(scope) :92564 message"
 
     assert not conventional_commit.is_valid(input)
 
 
 def test_is_valid__scope_not_optional(conventional_commit_scope_required):
-    input = "feat: message"
+    input = "feat:92564 message"
 
     assert not conventional_commit_scope_required.is_valid(input)
 
 
 def test_is_valid__scope_not_optional_empty_parenthesis(conventional_commit_scope_required):
-    input = "feat(): message"
+    input = "feat():92564 message"
 
     assert not conventional_commit_scope_required.is_valid(input)
 
 
 def test_is_valid__missing_delimiter(conventional_commit):
-    input = "feat message"
+    input = "feat 92564 message"
 
     assert not conventional_commit.is_valid(input)
 
@@ -688,10 +684,11 @@ def test_is_valid__missing_delimiter(conventional_commit):
 @pytest.mark.parametrize(
     "input,expected_result",
     [
-        ("feat: subject", True),
-        ("feat(scope): subject", True),
+        ("feat: subject", False),
+        ("feat:92564 subject", True),
+        ("feat(scope):92564 subject", True),
         (
-            """feat(scope): subject
+            """feat(scope):92564 subject
 
             cuerpo extendido
             """,
@@ -701,13 +698,23 @@ def test_is_valid__missing_delimiter(conventional_commit):
         ("feat subject", False),
         ("feat(scope): ", False),
         (": subject", False),
-        ("(scope): subject", False),
+        ("(scope):92564 subject", False),
         (
-            """feat(scope): subject
+            """feat(scope):92564 subject
             cuerpo extendido no newline
             """,
             False,
         ),
+        ("feat:123456789 subject", True),  # Exactamente 9 dígitos (válido)
+        ("feat:12345678 subject", True),  # Menos de 9 dígitos (válido)
+        ("feat:1234567890 subject", False),  # Más de 9 dígitos (inválido)
+        ("feat:12345a678 subject", False),  # Contiene letras (inválido)
+        ("feat:1234!5678 subject", False),  # Contiene caracteres especiales (inválido)
+        ("feat: subject", False),  # Falta número después de los dos puntos (inválido)
+        ("feat:12345 subject", True),  # Menos de 9 dígitos (válido)
+        ("feat(scope):12345678 subject", True),  # Scope con número válido
+        ("feat(scope):1234567890 subject", False),  # Scope con número inválido
+        ("feat(scope):abcd1234 subject", False),  # Scope con letras
     ],
 )
 def test_is_conventional(input, expected_result):

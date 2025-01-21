@@ -90,7 +90,7 @@ para editar el mensaje de commit y reintentar el commit.
 Make a (conventional) commit :heavy_check_mark::
 
 ```console
-$ git commit -m "feat: add a new feature"
+$ git commit -m "feat:92564 add a new feature"
 
 [INFO] Initializing environment for ....
 Conventional Commit......................................................Passed
@@ -126,7 +126,7 @@ Or from a Python program:
 from conventional_pre_commit.format import is_conventional
 
 # prints True
-print(is_conventional("feat: this is a conventional commit"))
+print(is_conventional("feat:92564 this is a conventional commit"))
 
 # prints False
 print(is_conventional("nope: this is not a conventional commit"))
