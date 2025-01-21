@@ -32,9 +32,9 @@ class Colors:
 def fail(commit: ConventionalCommit, use_color=True):
     c = Colors(use_color)
     lines = [
-        f"{c.red}[Bad commit message] >>{c.restore} {commit.message}"
-        f"{c.yellow}Your commit message does not follow Conventional Commits formatting{c.restore}",
-        f"{c.blue}https://www.conventionalcommits.org/{c.restore}",
+        f"{c.red}[Mensaje de commit incorrecto] >>{c.restore} {commit.message}"
+        f"{c.yellow}Tu mensaje de commit no sigue el formato de Conventional Commits.{c.restore}",
+        f"{c.blue}https://dev.azure.com/ACTSIS/DEVOPS/_wiki/wikis/DEVOPS.wiki/106/Buenas-pr%C3%A1cticas-Git/{c.restore}",
     ]
     return os.linesep.join(lines)
 
@@ -43,7 +43,7 @@ def verbose_arg(use_color=True):
     c = Colors(use_color)
     lines = [
         "",
-        f"{c.yellow}Use the {c.restore}--verbose{c.yellow} arg for more information{c.restore}",
+        f"{c.yellow}Usa el argumento {c.restore}--verbose{c.yellow} para más información.{c.restore}",
     ]
     return os.linesep.join(lines)
 
@@ -52,11 +52,11 @@ def fail_verbose(commit: ConventionalCommit, use_color=True):
     c = Colors(use_color)
     lines = [
         "",
-        f"{c.yellow}Conventional Commit messages follow a pattern like:",
+        f"{c.yellow}Los mensajes de commit convencionales siguen un patrón como:",
         "",
-        f"{c.restore}    type(scope): subject",
+        f"{c.restore}    type(scope): asunto",
         "",
-        "    extended body",
+        "    cuerpo extendido",
         "",
     ]
 
@@ -66,20 +66,29 @@ def fail_verbose(commit: ConventionalCommit, use_color=True):
 
     errors = commit.errors()
     if errors:
-        lines.append(f"{c.yellow}Please correct the following errors:{c.restore}")
+        lines.append(f"{c.yellow}Por favor corrige los siguientes errores:{c.restore}")
         lines.append("")
         for group in errors:
             if group == "type":
                 type_opts = _options(commit.types)
-                lines.append(f"{c.yellow}  - Expected value for {c.restore}type{c.yellow} from: {type_opts}")
+                lines.append(f"{c.yellow}  - Valor esperado para {c.restore}tipo{c.yellow} de: {type_opts}")
             elif group == "scope":
                 if commit.scopes:
-                    scopt_opts = _options(commit.scopes)
-                    lines.append(f"{c.yellow}  - Expected value for {c.restore}scope{c.yellow} from: {scopt_opts}")
+                    scope_opts = _options(commit.scopes)
+                    lines.append(f"{c.yellow}  - Valor esperado para {c.restore}scope{c.yellow} de: {scope_opts}")
                 else:
-                    lines.append(f"{c.yellow}  - Expected value for {c.restore}scope{c.yellow} but found none.{c.restore}")
+                    lines.append(
+                        f"{c.yellow}  - Valor esperado para {c.restore}scope{c.yellow} pero no se encontró ninguno.{c.restore}"
+                    )
+            elif group == "id":
+                # Nuevo manejo para el identificador numérico
+                lines.append(
+                    f"{c.yellow}  - Valor esperado para {c.restore}id (Número del requerimiento){c.yellow} pero no se encontró ninguno.{c.restore}"
+                )
             else:
-                lines.append(f"{c.yellow}  - Expected value for {c.restore}{group}{c.yellow} but found none.{c.restore}")
+                lines.append(
+                    f"{c.yellow}  - Valor esperado para {c.restore}{group}{c.yellow} pero no se encontró ninguno.{c.restore}"
+                )
 
     lines.extend(
         [
@@ -88,7 +97,7 @@ def fail_verbose(commit: ConventionalCommit, use_color=True):
             "",
             "    git commit --edit --file=.git/COMMIT_EDITMSG",
             "",
-            f"{c.yellow}to edit the commit message and retry the commit.{c.restore}",
+            f"{c.yellow}para editar el mensaje de commit y reintentar el commit.{c.restore}",
         ]
     )
     return os.linesep.join(lines)
@@ -97,9 +106,9 @@ def fail_verbose(commit: ConventionalCommit, use_color=True):
 def unicode_decode_error(use_color=True):
     c = Colors(use_color)
     return f"""
-{c.red}[Bad commit message encoding]{c.restore}
+{c.red}[Mensaje de commit incorrecto encoding]{c.restore}
 
-{c.yellow}conventional-pre-commit couldn't decode your commit message.
-UTF-8 encoding is assumed, please configure git to write commit messages in UTF-8.
-See {c.blue}https://git-scm.com/docs/git-commit/#_discussion{c.yellow} for more.{c.restore}
+{c.yellow}conventional-pre-commit no pudo decodificar tu mensaje de commit.
+Se asume codificación UTF-8, por favor configura git para escribir mensajes de commit en UTF-8.
+See {c.blue}https://github.com/ACTSIS/conventional-pre-commit/#_discussion{c.yellow} para más información.{c.restore}
 """

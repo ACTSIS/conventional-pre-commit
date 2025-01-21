@@ -4,7 +4,7 @@ from typing import List
 
 class Commit:
     """
-    Base class for inspecting commit message formatting.
+    Clase base para inspeccionar el formato de mensajes de commit.
     """
 
     AUTOSQUASH_PREFIXES = sorted(
@@ -21,36 +21,36 @@ class Commit:
 
     @property
     def r_autosquash_prefixes(self):
-        """Regex str for autosquash prefixes."""
+        """Cadena regex para prefijos de autosquash."""
         return self._r_or(self.AUTOSQUASH_PREFIXES)
 
     @property
     def r_verbose_commit_ignored(self):
-        """Regex str for the ignored part of a verbose commit message."""
+        """Cadena regex para la parte ignorada de un mensaje de commit detallado."""
         return r"^# -{24} >8 -{24}\r?\n.*\Z"
 
     @property
     def r_comment(self):
-        """Regex str for comments."""
+        """Cadena regex para comentarios."""
         return r"^#.*\r?\n?"
 
     def _r_or(self, items):
-        """Join items with pipe "|" to form regex ORs."""
+        """Une elementos con el símbolo "|" para formar un OR en regex."""
         return "|".join(items)
 
     def _strip_comments(self, commit_msg: str = ""):
-        """Strip comments from a commit message."""
+        """Elimina comentarios de un mensaje de commit."""
         commit_msg = commit_msg or self.message
         return re.sub(self.r_comment, "", commit_msg, flags=re.MULTILINE)
 
     def _strip_verbose_commit_ignored(self, commit_msg: str = ""):
-        """Strip the ignored part of a verbose commit message."""
+        """Elimina la parte ignorada de un mensaje de commit detallado."""
         commit_msg = commit_msg or self.message
         return re.sub(self.r_verbose_commit_ignored, "", commit_msg, flags=re.DOTALL | re.MULTILINE)
 
     def clean(self, commit_msg: str = ""):
         """
-        Removes comments and ignored verbose commit segments from a commit message.
+        Elimina comentarios y segmentos ignorados de un mensaje de commit.
         """
         commit_msg = commit_msg or self.message
         commit_msg = self._strip_verbose_commit_ignored(commit_msg)
@@ -59,8 +59,8 @@ class Commit:
 
     def has_autosquash_prefix(self, commit_msg: str = ""):
         """
-        Returns True if input starts with one of the autosquash prefixes used in git.
-        See the documentation, please https://git-scm.com/docs/git-rebase.
+        Devuelve True si la entrada comienza con uno de los prefijos de autosquash utilizados en git.
+        Consulta la documentación: https://git-scm.com/docs/git-rebase.
         """
         commit_msg = self.clean(commit_msg)
         pattern = f"^(({self.r_autosquash_prefixes})! ).*$"
@@ -70,8 +70,8 @@ class Commit:
 
     def is_merge(self, commit_msg: str = ""):
         """
-        Returns True if input starts with "Merge branch"
-        See the documentation, please https://git-scm.com/docs/git-merge.
+        Devuelve True si la entrada comienza con "Merge branch".
+        Consulta la documentación: https://git-scm.com/docs/git-merge.
         """
         commit_msg = self.clean(commit_msg)
         return commit_msg.lower().startswith("merge branch ")
@@ -79,7 +79,7 @@ class Commit:
 
 class ConventionalCommit(Commit):
     """
-    Impelements checks for Conventional Commits formatting.
+    Implementa verificaciones para el formato de Conventional Commits.
 
     https://www.conventionalcommits.org
     """
@@ -97,6 +97,7 @@ class ConventionalCommit(Commit):
             "revert",
             "style",
             "test",
+            "wip",
         ]
     )
 
@@ -115,15 +116,26 @@ class ConventionalCommit(Commit):
 
     @property
     def r_types(self):
-        """Regex str for valid types."""
+        """Cadena regex para tipos válidos."""
         return self._r_or(self.types)
 
     @property
+    def r_id(self):
+        """Expresión regular para el identificador numérico requerido después del delimitador."""
+        return r"\d{1,9}"
+
+    @property
+    def r_subject(self):
+        """Cadena regex para la línea de asunto, asumiendo que tras el ID habrá un espacio y luego el mensaje."""
+        # Aseguramos que haya un espacio luego del número y el resto del mensaje
+        return r" .+$"
+
+    @property
     def r_scope(self):
-        """Regex str for an optional (scope)."""
+        """Cadena regex para un scope opcional o requerido con formato específico."""
         if self.scopes:
             scopes = self._r_or(self.scopes)
-            escaped_delimiters = list(map(re.escape, [":", ",", "-", "/"]))  # type: ignore
+            escaped_delimiters = list(map(re.escape, [":", ",", "-", "/"]))
             delimiters_pattern = self._r_or(escaped_delimiters)
             scope_pattern = rf"\(\s*(?:{scopes})(?:\s*(?:{delimiters_pattern})\s*(?:{scopes}))*\s*\)"
 
@@ -139,74 +151,88 @@ class ConventionalCommit(Commit):
 
     @property
     def r_delim(self):
-        """Regex str for optional breaking change indicator and colon delimiter."""
+        """Cadena regex para un indicador opcional de cambio importante y el delimitador de dos puntos."""
         return r"!?:"
 
     @property
-    def r_subject(self):
-        """Regex str for subject line."""
-        return r" .+$"
-
-    @property
     def r_body(self):
-        """Regex str for the body, with multiline support."""
+        """Cadena regex para el cuerpo, con soporte multilinea."""
         return r"(?P<multi>\r?\n(?P<sep>^$\r?\n)?.+)?"
 
     @property
     def regex(self):
-        """`re.Pattern` for ConventionalCommits formatting."""
+        """`re.Pattern` para el formato de Conventional Commits."""
         types_pattern = f"^(?P<type>{self.r_types})?"
         scope_pattern = f"(?P<scope>{self.r_scope})?"
-        delim_pattern = f"(?P<delim>{self.r_delim})?"
+        # Combina el delimitador, el ID numérico y el asunto
+        delim_pattern = f"(?P<delim>{self.r_delim})"
+        id_pattern = f"(?P<id>{self.r_id})"
         subject_pattern = f"(?P<subject>{self.r_subject})?"
         body_pattern = f"(?P<body>{self.r_body})?"
-        pattern = types_pattern + scope_pattern + delim_pattern + subject_pattern + body_pattern
+
+        pattern = types_pattern + scope_pattern + delim_pattern + id_pattern + subject_pattern + body_pattern
 
         return re.compile(pattern, re.MULTILINE)
 
     def errors(self, commit_msg: str = "") -> List[str]:
         """
-        Return a list of missing Conventional Commit components from a commit message.
+        Devuelve una lista de componentes faltantes de Conventional Commits en un mensaje de commit.
         """
-        match = self.match(commit_msg)
-        groups = match.groupdict() if match else {}
+        commit_msg = self.clean(commit_msg)
 
-        # With a type error, the rest of the components will be unmatched
-        # even if the overall structure of the commit is correct,
-        # since a correct type must come first.
-        #
-        # E.g. with an invalid type:
-        #
-        #    invalid: this is a commit
-        #
-        # The delim, subject, and body components would all be missing from the match
-        # there's no need to notify on the other components when the type is invalid
-        if not groups.get("type"):
-            groups.pop("delim", None)
-            groups.pop("subject", None)
-            groups.pop("body", None)
+        missing = []
 
-        if self.scope_optional:
-            groups.pop("scope", None)
+        # Verificar el 'type'
+        if not re.match(rf"^{self.r_types}", commit_msg):
+            missing.append("type")
 
-        if not groups.get("body"):
-            groups.pop("multi", None)
-            groups.pop("sep", None)
+        # Verificar el 'scope' si no es opcional
+        if not self.scope_optional:
+            if not re.match(rf"^{self.r_types}\({self.r_scope}\)", commit_msg):
+                missing.append("scope")
+        else:
+            # Si el scope es opcional pero presente, verificar su validez
+            scope_match = re.match(rf"^{self.r_types}\({self.r_scope}\)", commit_msg)
+            if scope_match and not scope_match.group("scope"):
+                missing.append("scope")
 
-        return [g for g, v in groups.items() if not v]
+        # Verificar el 'delim'
+        if not re.search(rf"{self.r_delim}", commit_msg):
+            missing.append("delim")
+
+        # Verificar el 'id'
+        if not re.search(rf"{self.r_delim}\s*\d{{1,9}}", commit_msg):
+            missing.append("id")
+
+        # Verificar el 'subject'
+        subject_match = re.search(rf"{self.r_subject}", commit_msg)
+        if not subject_match:
+            missing.append("subject")
+
+        # Verificar 'body' y 'sep'
+        # Determinar si hay un cuerpo presente (un salto de línea seguido de texto)
+        body_present = bool(re.search(r"\r?\n.+", commit_msg))
+        if body_present:
+            # Verificar si hay una línea en blanco (sep) antes del cuerpo
+            # Esto significa que hay dos saltos de línea consecutivos
+            if not re.search(r"\r?\n\r?\n.+", commit_msg):
+                missing.append("sep")
+
+        return missing
 
     def is_valid(self, commit_msg: str = "") -> bool:
         """
-        Returns True if commit_msg matches Conventional Commits formatting.
+        Devuelve True si el mensaje de commit cumple con el formato de Conventional Commits.
         https://www.conventionalcommits.org
         """
+
         match = self.match(commit_msg)
 
         # match all the required components
         #
-        #    type(scope): subject
+        #    type(scope): asunto
         #
-        #    extended body
+        #    cuerpo extendido
         #
         return bool(match) and all(
             [
@@ -227,7 +253,7 @@ class ConventionalCommit(Commit):
 
     def match(self, commit_msg: str = ""):
         """
-        Returns an `re.Match` object for the input against the Conventional Commits format.
+        Devuelve un objeto `re.Match` para la entrada que cumple con el formato de Conventional Commits.
         """
         commit_msg = self.clean(commit_msg) or self.message
         return self.regex.match(commit_msg)
@@ -237,10 +263,10 @@ def is_conventional(
     input: str, types: List[str] = ConventionalCommit.DEFAULT_TYPES, optional_scope: bool = True, scopes: List[str] = []
 ) -> bool:
     """
-    Returns True if input matches Conventional Commits formatting
+    Devuelve True si la entrada cumple con el formato de Conventional Commits.
     https://www.conventionalcommits.org
 
-    Optionally provide a list of additional custom types.
+    Opcionalmente, se puede proporcionar una lista de tipos personalizados adicionales.
     """
     commit = ConventionalCommit(commit_msg=input, types=types, scope_optional=optional_scope, scopes=scopes)
 

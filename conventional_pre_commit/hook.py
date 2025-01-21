@@ -10,33 +10,40 @@ RESULT_FAIL = 1
 
 def main(argv=[]):
     parser = argparse.ArgumentParser(
-        prog="conventional-pre-commit", description="Check a git commit message for Conventional Commits formatting."
+        prog="conventional-pre-commit",
+        description="Verifica si un mensaje de commit de git sigue el formato de Conventional Commits.",
     )
     parser.add_argument(
-        "types", type=str, nargs="*", default=ConventionalCommit.DEFAULT_TYPES, help="Optional list of types to support"
+        "types", type=str, nargs="*", default=ConventionalCommit.DEFAULT_TYPES, help="Lista opcional de tipos a soportar."
     )
-    parser.add_argument("input", type=str, help="A file containing a git commit message")
-    parser.add_argument("--no-color", action="store_false", default=True, dest="color", help="Disable color in output.")
+    parser.add_argument("input", type=str, help="Un archivo que contiene un mensaje de commit de git.")
     parser.add_argument(
-        "--force-scope", action="store_false", default=True, dest="optional_scope", help="Force commit to have scope defined."
+        "--no-color", action="store_false", default=True, dest="color", help="Desactiva los colores en la salida."
+    )
+    parser.add_argument(
+        "--force-scope",
+        action="store_false",
+        default=True,
+        dest="optional_scope",
+        help="Fuerza a que el commit tenga un scope definido.",
     )
     parser.add_argument(
         "--scopes",
         type=str,
         default=None,
-        help="List of scopes to support. Scopes should be separated by commas with no spaces (e.g. api,client).",
+        help="Lista de scopes soportados. Los scopes deben estar separados por comas sin espacios (por ejemplo: api,cliente).",
     )
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Force commit to strictly follow Conventional Commits formatting. Disallows fixup! and merge commits.",
+        help="Fuerza a que el commit siga estrictamente el formato de Conventional Commits. No permite commits con fixup! ni merge.",
     )
     parser.add_argument(
         "--verbose",
         action="store_true",
         dest="verbose",
         default=False,
-        help="Print more verbose error output.",
+        help="Imprime mensajes de error más detallados.",
     )
 
     if len(argv) < 1:
