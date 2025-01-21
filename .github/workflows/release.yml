@@ -45,12 +45,6 @@ jobs:
           skip-existing: true
           verbose: true
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        if: ${{ !contains(github.ref, '-pre') }}
-        with:
-          print-hash: true
-
       - name: Release
         id: release
         uses: softprops/action-gh-release@v2
