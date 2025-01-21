@@ -50,9 +50,9 @@ Conventional Commit......................................................Failed
 - duration: 0.07s
 - exit code: 1
 
-[Bad commit message] >> add a new feature
+[Mensaje de commit incorrecto] >> add a new feature
 Your commit message does not follow Conventional Commits formatting
-https://www.conventionalcommits.org/
+https://dev.azure.com/ACTSIS/DEVOPS/_wiki/wikis/DEVOPS.wiki/106/Buenas-pr%C3%A1cticas-Git/
 ```
 
 And with the `--verbose` arg:
@@ -66,25 +66,25 @@ Conventional Commit......................................................Failed
 - duration: 0.07s
 - exit code: 1
 
-[Bad commit message] >> add a new feature
+[Mensaje de commit incorrecto] >> add a new feature
 Your commit message does not follow Conventional Commits formatting
-https://www.conventionalcommits.org/
+https://dev.azure.com/ACTSIS/DEVOPS/_wiki/wikis/DEVOPS.wiki/106/Buenas-pr%C3%A1cticas-Git/
 
-Conventional Commit messages follow a pattern like:
+Los mensajes de commit convencionales siguen un patrón como:
 
-    type(scope): subject
+    type(scope): asunto
 
-    extended body
+    cuerpo extendido
 
-Please correct the following errors:
+Por favor corrige los siguientes errores:
 
-  - Expected value for type from: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test
+  - Valor esperado para type de: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test
 
 Run:
 
     git commit --edit --file=.git/COMMIT_EDITMSG
 
-to edit the commit message and retry the commit.
+para editar el mensaje de commit y reintentar el commit.
 ```
 
 Make a (conventional) commit :heavy_check_mark::
@@ -143,19 +143,19 @@ print(is_conventional("custom: this is a conventional commit", types=["custom"])
 $ conventional-pre-commit -h
 usage: conventional-pre-commit [-h] [--no-color] [--force-scope] [--scopes SCOPES] [--strict] [--verbose] [types ...] input
 
-Check a git commit message for Conventional Commits formatting.
+Verifica si un mensaje de commit de git sigue el formato de Conventional Commits.
 
 positional arguments:
-  types            Optional list of types to support
-  input            A file containing a git commit message
+  types            Lista opcional de tipos a soportar.
+  input            Un archivo que contiene un mensaje de commit de git.
 
 options:
   -h, --help       show this help message and exit
-  --no-color       Disable color in output.
-  --force-scope    Force commit to have scope defined.
-  --scopes SCOPES  List of scopes to support. Scopes should be separated by commas with no spaces (e.g. api,client).
-  --strict         Force commit to strictly follow Conventional Commits formatting. Disallows fixup! and merge commits.
-  --verbose        Print more verbose error output.
+  --no-color       Desactiva los colores en la salida.
+  --force-scope    Fuerza a que el commit tenga un scope definido.
+  --scopes SCOPES  Lista de scopes soportados. Los scopes deben estar separados por comas sin espacios (por ejemplo: api,cliente).
+  --strict         Fuerza a que el commit siga estrictamente el formato de Conventional Commits. No permite commits con fixup! ni merge.
+  --verbose        Imprime mensajes de error más detallados.
 ```
 
 Supply arguments on the command-line, or via the pre-commit `hooks.args` property:

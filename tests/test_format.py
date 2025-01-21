@@ -693,7 +693,7 @@ def test_is_valid__missing_delimiter(conventional_commit):
         (
             """feat(scope): subject
 
-            extended body
+            cuerpo extendido
             """,
             True,
         ),
@@ -704,7 +704,7 @@ def test_is_valid__missing_delimiter(conventional_commit):
         ("(scope): subject", False),
         (
             """feat(scope): subject
-            extended body no newline
+            cuerpo extendido no newline
             """,
             False,
         ),

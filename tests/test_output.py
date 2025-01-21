@@ -35,10 +35,10 @@ def test_fail(commit):
     assert Colors.LBLUE in output
     assert Colors.RESTORE in output
 
-    assert "Bad commit message" in output
+    assert "Mensaje de commit incorrecto" in output
     assert "commit msg" in output
     assert "Conventional Commits formatting" in output
-    assert "https://www.conventionalcommits.org/" in output
+    assert "https://dev.azure.com/ACTSIS/DEVOPS/_wiki/wikis/DEVOPS.wiki/106/Buenas-pr%C3%A1cticas-Git/" in output
 
 
 def test_fail__no_color(commit):
@@ -59,14 +59,14 @@ def test_fail_verbose(commit):
 
     output = output.replace(Colors.YELLOW, Colors.RESTORE).replace(Colors.RESTORE, "")
 
-    assert "Conventional Commit messages follow a pattern like" in output
-    assert f"type(scope): subject{os.linesep}{os.linesep}    extended body" in output
-    assert "Expected value for type from:" in output
+    assert "Los mensajes de commit convencionales siguen un patrón como:" in output
+    assert f"type(scope): asunto{os.linesep}{os.linesep}    cuerpo extendido" in output
+    assert "Valor esperado para tipo de: " in output
     for t in commit.types:
         assert t in output
-    assert "Expected value for scope but found none." in output
+    assert "Valor esperado para scope pero no se encontró ninguno." in output
     assert "git commit --edit --file=.git/COMMIT_EDITMSG" in output
-    assert "edit the commit message and retry the commit" in output
+    assert "para editar el mensaje de commit y reintentar el commit." in output
 
 
 def test_fail_verbose__no_color(commit):
@@ -82,16 +82,16 @@ def test_fail_verbose__optional_scope(commit):
     commit.scope_optional = True
     output = fail_verbose(commit, use_color=False)
 
-    assert "Expected value for scope but found none." not in output
+    assert "Valor esperado para scope pero no se encontró ninguno." not in output
 
 
 def test_fail_verbose__missing_subject():
     commit = ConventionalCommit("feat(scope):", scope_optional=False)
     output = fail_verbose(commit, use_color=False)
 
-    assert "Expected value for subject but found none." in output
-    assert "Expected value for type but found none." not in output
-    assert "Expected value for scope but found none." not in output
+    assert "Valor esperado para subject pero no se encontró ninguno." in output
+    assert "Valor esperado para type pero no se encontró ninguno." not in output
+    assert "Valor esperado para scope pero no se encontró ninguno." not in output
 
 
 def test_fail_verbose__no_body_sep():
@@ -104,12 +104,12 @@ body without blank line
 
     output = fail_verbose(commit, use_color=False)
 
-    assert "Expected value for sep but found none." in output
-    assert "Expected value for multi but found none." not in output
+    assert "Valor esperado para sep pero no se encontró ninguno." in output
+    assert "Valor esperado para multi pero no se encontró ninguno." not in output
 
-    assert "Expected value for subject but found none." not in output
-    assert "Expected value for type but found none." not in output
-    assert "Expected value for scope but found none." not in output
+    assert "Valor esperado para subject pero no se encontró ninguno." not in output
+    assert "Valor esperado para type pero no se encontró ninguno." not in output
+    assert "Valor esperado para scope pero no se encontró ninguno." not in output
 
 
 def test_unicode_decode_error():
@@ -120,9 +120,9 @@ def test_unicode_decode_error():
     assert Colors.LBLUE in output
     assert Colors.RESTORE in output
 
-    assert "Bad commit message encoding" in output
-    assert "UTF-8 encoding is assumed" in output
-    assert "https://git-scm.com/docs/git-commit/#_discussion" in output
+    assert "Mensaje de commit incorrecto encoding" in output
+    assert "Se asume codificación UTF-8, por favor configura git para escribir mensajes de commit en UTF-8." in output
+    assert "https://github.com/ACTSIS/conventional-pre-commit/#_discussion" in output
 
 
 def test_unicode_decode_error__no_color():
