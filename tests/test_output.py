@@ -37,7 +37,7 @@ def test_fail(commit):
 
     assert "Mensaje de commit incorrecto" in output
     assert "commit msg" in output
-    assert "Conventional Commits formatting" in output
+    assert "formato de Conventional Commits." in output
     assert "https://dev.azure.com/ACTSIS/DEVOPS/_wiki/wikis/DEVOPS.wiki/106/Buenas-pr%C3%A1cticas-Git/" in output
 
 

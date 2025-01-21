@@ -33,7 +33,7 @@ def fail(commit: ConventionalCommit, use_color=True):
     c = Colors(use_color)
     lines = [
         f"{c.red}[Mensaje de commit incorrecto] >>{c.restore} {commit.message}"
-        f"{c.yellow}Your commit message does not follow Conventional Commits formatting{c.restore}",
+        f"{c.yellow}Tu mensaje de commit no sigue el formato de Conventional Commits.{c.restore}",
         f"{c.blue}https://dev.azure.com/ACTSIS/DEVOPS/_wiki/wikis/DEVOPS.wiki/106/Buenas-pr%C3%A1cticas-Git/{c.restore}",
     ]
     return os.linesep.join(lines)
